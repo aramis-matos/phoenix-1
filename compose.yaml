@@ -1,0 +1,46 @@
+services:
+  server:
+    build:
+      context: ./discuss
+      dockerfile: Dockerfile
+    ports:
+      - 4000:4000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["mix", "phx.server"]
+    environment:
+      PG_HOST: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "curl http://localhost:4000 || false"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 1m
+    develop:
+      watch:
+        - path: ./discuss/lib
+          target: /app/lib
+          action: sync
+  postgres:
+    image: postgres:17.6-alpine3.22
+    env_file:
+      - ./postgres.env
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    ports:
+      - 5432:5432
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+  

@@ -36,7 +36,10 @@ discuss/npm-debug.log
 discuss/assets/node_modules/
 
 # Remove certs
-/**/certs/*
+discuss/certs
 
 pgdata/
+
+.direnv
+.nix-mix
 
